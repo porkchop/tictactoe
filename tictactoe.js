@@ -33,7 +33,10 @@ TicTacToe.prototype.resetBoard = function() {
 
 TicTacToe.prototype.addMove = function(r, c, tictac) {
   var i = r * 3 + c;
+  console.log();
+  console.log('Move: ', r, c, tictac)
   if(this.getStatus() !== tictac + '\'s turn' || this.board[i] !== ' ') {
+    console.log('Failed');
     this.displayBoard();
     return false;
   }
@@ -42,6 +45,7 @@ TicTacToe.prototype.addMove = function(r, c, tictac) {
 
   this.turn = tictac === 'X' ? 'O' : 'X';
 
+  console.log('Worked');
   this.displayBoard();
 
   return true;
@@ -67,15 +71,16 @@ TicTacToe.prototype.getStatus = function() {
 }
 
 TicTacToe.prototype.displayBoard = function() {
-  var top = this.board.slice(0, 3);
-  var mid = this.board.slice(3, 6);
-  var bot = this.board.slice(6);
+  var top = this.board.slice(0, 3).split('').join('|');
+  var mid = this.board.slice(3, 6).split('').join('|');
+  var bot = this.board.slice(6).split('').join('|');
 
   console.log(this.getStatus());
   console.log(top);
+  console.log('-----');
   console.log(bot);
+  console.log('-----');
   console.log(mid);
-  console.log();
 }
 
 
