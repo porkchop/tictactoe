@@ -41,11 +41,11 @@ TicTacToe.prototype.log = function() {
   }
 }
 
-TicTacToe.prototype.addMove = function(r, c, tictac) {
-  var i = r * 3 + c;
+TicTacToe.prototype.addMove = function(row, column, tictac) {
+  var i = row * 3 + column;
 
   this.log();
-  this.log('Move: ', r, c, tictac)
+  this.log('Move: ', row, column, tictac)
 
   if(this.getStatus() !== tictac + 's turn' || this.board[i] !== ' ') {
     this.log('Failed');
