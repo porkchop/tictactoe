@@ -22,8 +22,12 @@ function findWin(boardMask) {
   return false;
 }
 
-function TicTacToe() {
-  this.resetBoard();
+function TicTacToe(opts) {
+  opts = opts || {};
+  this.board = opts.board || blankBoard.slice(0);
+  this.turn = opts.turn || 'X';
+  this.logging = !!opts.logging;
+  console.assert(this.board.length === 9, 'Board length incorrect', this.board.length);
 }
 
 TicTacToe.prototype.resetBoard = function() {
@@ -31,12 +35,20 @@ TicTacToe.prototype.resetBoard = function() {
   this.turn = 'X';
 }
 
+TicTacToe.prototype.log = function() {
+  if(this.logging) {
+    console.log.apply(null, arguments);
+  }
+}
+
 TicTacToe.prototype.addMove = function(r, c, tictac) {
   var i = r * 3 + c;
-  console.log();
-  console.log('Move: ', r, c, tictac)
-  if(this.getStatus() !== tictac + '\'s turn' || this.board[i] !== ' ') {
-    console.log('Failed');
+
+  this.log();
+  this.log('Move: ', r, c, tictac)
+
+  if(this.getStatus() !== tictac + 's turn' || this.board[i] !== ' ') {
+    this.log('Failed');
     this.displayBoard();
     return false;
   }
@@ -45,7 +57,7 @@ TicTacToe.prototype.addMove = function(r, c, tictac) {
 
   this.turn = tictac === 'X' ? 'O' : 'X';
 
-  console.log('Worked');
+  this.log('Worked');
   this.displayBoard();
 
   return true;
@@ -67,7 +79,7 @@ TicTacToe.prototype.getStatus = function() {
    return 'Draw';
  }
 
- return this.turn  + '\'s turn';
+ return this.turn  + 's turn';
 }
 
 TicTacToe.prototype.displayBoard = function() {
@@ -75,24 +87,110 @@ TicTacToe.prototype.displayBoard = function() {
   var mid = this.board.slice(3, 6).split('').join('|');
   var bot = this.board.slice(6).split('').join('|');
 
-  console.log(this.getStatus());
-  console.log(top);
-  console.log('-----');
-  console.log(bot);
-  console.log('-----');
-  console.log(mid);
+  this.log(this.getStatus());
+  this.log(top);
+  this.log('-----');
+  this.log(bot);
+  this.log('-----');
+  this.log(mid);
 }
 
 
-var t = new TicTacToe();
 
-t.addMove(0, 1, 'C');
-t.addMove(0, 1, 'O');
-t.addMove(0, 1, 'X');
-t.addMove(0, 2, 'X');
-t.addMove(0, 2, 'O');
-t.addMove(1, 1, 'X');
-t.addMove(1, 1, 'O');
-t.addMove(1, 2, 'O');
-t.addMove(2, 1, 'X');
-t.addMove(2, 2, 'O');
+///////////////////////////////////////
+//////////////// Tests ////////////////
+///////////////////////////////////////
+
+TTTTest('it sees Xs turn', {
+  tictactoe: {
+    board: 'XX O O O ',
+    turn: 'X',
+    logging: false
+  },
+  expectedStatus: 'Xs turn',
+  shouldThrow: false,
+});
+
+TTTTest('it sees a winning move', {
+  tictactoe: {
+    board: 'XX   O O ',
+    turn: 'O',
+    logging: false
+  },
+  moves: [
+    [1, 0, 'O'],
+    [0, 2, 'X']
+  ],
+  expectedStatus: 'X wins',
+  shouldThrow: false,
+});
+
+TTTTest('deliberately fails', {
+  tictactoe: {
+    board: 'XX O O O ',
+    turn: 'X',
+    logging: false
+  },
+  moves: [[0, 2, 'X']],
+  expectedStatus: 'Impossible status',
+  shouldThrow: false,
+});
+
+TTTTest('rejects a board that is too long', {
+  tictactoe: {
+    board: 'XX O O O  ',
+    turn: 'X',
+    logging: false
+  },
+  shouldThrow: true,
+});
+
+TTTTest('rejects an incorrect turn setting', {
+  tictactoe: {
+    board: 'XX O O O ',
+    turn: 'D',
+    logging: false
+  },
+  shouldThrow: true,
+});
+
+
+///////////////////////////////////////
+//////////// Test utility /////////////
+///////////////////////////////////////
+
+function TTTTest(description, opts) {
+  console.assert(!!description, 'Description required');
+  console.assert(!!opts, 'opts required');
+  if(!(this instanceof TTTTest)) {
+    return new TTTTest(description, opts);
+  }
+  this.tictactoe = opts.tictactoe;
+  this.moves = opts.moves || [];
+  this.expectedStatus = opts.expectedStatus;
+  this.description = description;
+  this.shouldThrow = opts.shouldThrow;
+
+  // execute
+  try {
+    var tictactoe = new TicTacToe(this.tictactoe);
+
+    for(i in this.moves) {
+      var move = this.moves[i];
+      tictactoe.addMove.apply(tictactoe, move);
+    }
+
+    if(this.shouldThrow) {
+      console.log('test:', this.description, ': FAILED - should have thrown');
+    } else {
+      console.assert(this.expectedStatus === tictactoe.getStatus(), this.expectedStatus + ' !== ' + tictactoe.getStatus())
+      console.log('test:', this.description, ': SUCCESS');
+    }
+  } catch(e) {
+    if(this.shouldThrow) {
+      console.log('test:', this.description, ': SUCCESS');
+    } else {
+      console.log('test:', this.description, ': FAILED', e.message);
+    }
+  }
+}
