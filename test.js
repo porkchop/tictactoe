@@ -1,4 +1,4 @@
-TTTTest = require('./ttttest');
+var TTTTest = require('./ttttest');
 
 
 TTTTest('it sees Xs turn', {
